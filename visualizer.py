@@ -1,6 +1,7 @@
 import matplotlib as plt
 import re
 import glob
+import os
 
 #  3 priorities: high med low
 #  disproportionally distributed such that most utilization is on one of the
@@ -100,7 +101,7 @@ def pickHeavyL(metas):
     return result
 
 def metaParser(filename):
-    me = {}
+    me = {"name":filename}
     with open(filename) as f:
         content = f.readlines()
         for line in content:
@@ -151,3 +152,17 @@ if __name__ == "__main__":
     print("high heavy: "+ str(len(heavyH)))
     print("med heavy: "+ str(len(heavyM)))
     print("low heavy: "+ str(len(heavyL)))
+
+    whiteList = []
+
+    for me in heavyH:
+        whiteList.append(me["name"])
+    for me in heavyM:
+        whiteList.append(me["name"])
+    for me in heavyL:
+        whiteList.append(me["name"])
+
+    blackList = set(metaFiles) - set(whiteList)
+    for b in blackList:
+        os.remove(b)
+
