@@ -36,12 +36,29 @@ def getPer(me):
     periodL = me[1]["per"]
     return periodH, periodM, periodL
 
-def getAcc(cnf, me):
+# column accuracy
+def getPrecision(cnf, me):
     hi, mi, li = getId(me)
     h = cnf[hi][hi]
     m = cnf[mi][mi]
     l = cnf[li][li]
-    return h, m, l
+    for i in range(4):
+        ht += cnf[i][hi]
+        mt += cnf[i][mi]
+        lt += cnf[i][li]
+    return h/ht, m/mt, l/lt
+
+# row accuracy
+def getRec(cnf, me):
+    hi, mi, li = getId(me)
+    h = cnf[hi][hi]
+    m = cnf[mi][mi]
+    l = cnf[li][li]
+    for i in range(4):
+        ht += cnf[hi][i]
+        mt += cnf[mi][i]
+        lt += cnf[li][i]
+    return h/ht, m/mt, l/lt
 
 def extractId(metas):
     high = []
@@ -67,16 +84,27 @@ def extractUtilization(metas):
         low.append(l)
     return high, med, low
 
-def extractAccuracy(cnfs, metas):
+def extractRecall(cnfs, metas):
     ha = []
     ma = []
     ia = []
     for i in range(len(cnfs)):
-        h, m, l = getAcc(metas(i))
+        h, m, l = getRec(metas(i))
         ha.append(h)
         ma.append(m)
         la.append(l)
-    return ha, ma, ia
+    return ha, ma, la
+
+def extractPrecision(cnfs, metas):
+    ha = []
+    ma = []
+    ia = []
+    for i in range(len(cnfs)):
+        h, m, l = getPrecision(metas(i))
+        ha.append(h)
+        ma.append(m)
+        la.append(l)
+    return ha, ma, la
 
 def extractExecution(metas):
     high = []
@@ -197,9 +225,6 @@ if __name__ == "__main__":
 
     h, m, l = extractUtilization(lowMetas)
 
-    print(l)
-    exit()
-
     heavyL = pickHeavyL(lowMetas)
     heavyM = pickHeavyM(lowMetas)
     heavyH = pickHeavyH(lowMetas)
@@ -212,12 +237,12 @@ if __name__ == "__main__":
 
     for me in heavyH:
         whiteList.append(me["name"])
+        print(me["name"])
     for me in heavyM:
         whiteList.append(me["name"])
     for me in heavyL:
         whiteList.append(me["name"])
 
-    print(lowMetas[0])
 
 
     '''
