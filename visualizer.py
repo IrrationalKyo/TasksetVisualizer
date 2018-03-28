@@ -9,6 +9,9 @@ import os
 #  visualiza by the following:
 #  per task utilization
 
+def getId(me):
+    return me[3]["id"], me[2]["id"], me[1]["id"]
+
 def getUtil(me):
     executionTimeH = me[3]["exe"]
     periodH = me[3]["per"]
@@ -33,6 +36,23 @@ def getPer(me):
     periodL = me[1]["per"]
     return periodH, periodM, periodL
 
+def getAcc(cnf, me):
+    hi, mi, li = getId(me)
+    h = cnf[hi][hi]
+    m = cnf[mi][mi]
+    l = cnf[li][li]
+    return h, m, l
+
+def extractId(metas):
+    high = []
+    med  = []
+    low  = []
+    for me in metas:
+        h, m, l = getId(me)
+        high.append(h)
+        med.append(m)
+        low.append(l)
+    return high, med, low
 
 # assumes that the taskset is of size 3 has (high, med, low) priorities
 # assumes that metas are parsed and has associated id
@@ -47,7 +67,18 @@ def extractUtilization(metas):
         low.append(l)
     return high, med, low
 
-def extractPeriod(metas):
+def extractAccuracy(cnfs, metas):
+    ha = []
+    ma = []
+    ia = []
+    for i in range(len(cnfs)):
+        h, m, l = getAcc(metas(i))
+        ha.append(h)
+        ma.append(m)
+        la.append(l)
+    return ha, ma, ia
+
+def extractExecution(metas):
     high = []
     med  = []
     low  = []
@@ -115,11 +146,17 @@ def metaParser(filename):
                 me["utility"]=float(parts[1])
             elif "Task-" in line:
                 parts = line.split(" ")
+
+                taskId = parts[0]
+                taskId = re.sub(r'\W+', ' ', taskId)
+                taskId = int(taskId.strip().split(" ")[1])
+
                 parts = parts[1:]
                 pri = -1
                 exe = -1
                 per = -1
                 offs= -1
+
                 for e in parts:
                     e = re.sub(r'\W+', ' ', e)
                     ep = e.split(" ")
@@ -131,8 +168,23 @@ def metaParser(filename):
                         pri = int(ep[1])
                     elif ep[0] == "offset":
                         offs = int(ep[1])
-                me[pri] = {"exe":exe,"per":per,"off":offs}
+                me[pri] = {"id": taskId, "exe":exe,"per":per,"off":offs}
     return me
+
+
+def plotAccVsTaskUtil(cnfs, metas):
+    if len(cnfs) != len(metas):
+        return None
+
+    ha, ma, ia = extractAccuracy(cnfs, metas)
+    hu, mu, iu = extractUtility(metas)
+
+    plt.scatter(hu, ha, c='r')
+    plt.scatter(mu, ma, c='g')
+    plt.scatter(lu, la, c='b')
+    plt.plot()
+
+    return
 
 
 if __name__ == "__main__":
@@ -144,6 +196,9 @@ if __name__ == "__main__":
         lowMetas.append(me)
 
     h, m, l = extractUtilization(lowMetas)
+
+    print(l)
+    exit()
 
     heavyL = pickHeavyL(lowMetas)
     heavyM = pickHeavyM(lowMetas)
@@ -162,7 +217,12 @@ if __name__ == "__main__":
     for me in heavyL:
         whiteList.append(me["name"])
 
+    print(lowMetas[0])
+
+
+    '''
     blackList = set(metaFiles) - set(whiteList)
     for b in blackList:
         os.remove(b)
+    '''
 
