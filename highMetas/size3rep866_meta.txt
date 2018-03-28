@@ -1,0 +1,4 @@
+TaskSet(0.9387617554858934):
+	Task-1: p=870, c=288, pri=1, offset=481
+	Task-2: p=400, c=114, pri=2, offset=144
+	Task-3: p=220, c=71, pri=3, offset=215
