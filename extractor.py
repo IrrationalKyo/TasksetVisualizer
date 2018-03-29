@@ -1,4 +1,5 @@
-import matplotlib as plt
+import numpy as np
+import matplotlib.pyplot as plt
 import re
 import glob
 import os
@@ -8,6 +9,11 @@ import os
 #  three
 #  visualiza by the following:
 #  per task utilization
+
+def getRep(name):
+    frontString = name.split('_')[0]
+    rep = int(frontString.split('rep')[1])
+    return rep
 
 def getId(me):
     return me[3]["id"], me[2]["id"], me[1]["id"]
@@ -42,6 +48,9 @@ def getPrecision(cnf, me):
     h = cnf[hi][hi]
     m = cnf[mi][mi]
     l = cnf[li][li]
+    ht = 0
+    mt = 0
+    lt = 0
     for i in range(4):
         ht += cnf[i][hi]
         mt += cnf[i][mi]
@@ -54,6 +63,9 @@ def getRec(cnf, me):
     h = cnf[hi][hi]
     m = cnf[mi][mi]
     l = cnf[li][li]
+    ht = 0
+    mt = 0
+    lt = 0
     for i in range(4):
         ht += cnf[hi][i]
         mt += cnf[mi][i]
@@ -71,6 +83,15 @@ def extractId(metas):
         low.append(l)
     return high, med, low
 
+def getCorrespondingMatrix(cnfDict, metas):
+    conf0List = []
+    conf99List = []
+    for me in metas:
+        mId = getRep(me["name"])
+        conf0List.append(cnfDict[0][mId])
+        conf99List.append(cnfDict[99][mId])
+    return conf0List, conf99List
+
 # assumes that the taskset is of size 3 has (high, med, low) priorities
 # assumes that metas are parsed and has associated id
 def extractUtilization(metas):
@@ -87,9 +108,9 @@ def extractUtilization(metas):
 def extractRecall(cnfs, metas):
     ha = []
     ma = []
-    ia = []
+    la = []
     for i in range(len(cnfs)):
-        h, m, l = getRec(metas(i))
+        h, m, l = getRec(cnfs[i], metas[i])
         ha.append(h)
         ma.append(m)
         la.append(l)
@@ -98,13 +119,26 @@ def extractRecall(cnfs, metas):
 def extractPrecision(cnfs, metas):
     ha = []
     ma = []
-    ia = []
+    la = []
     for i in range(len(cnfs)):
-        h, m, l = getPrecision(metas(i))
+        h, m, l = getPrecision(cnfs[i],metas[i])
         ha.append(h)
         ma.append(m)
         la.append(l)
     return ha, ma, la
+
+def extractF1(cnfs, metas):
+    hp, mp, lp = extractPrecision(cnfs, metas)
+    hr, mr, lr = extractRecall(cnfs, metas)
+    hf = []
+    mf = []
+    lf = []
+
+    for i in range(len(hp)):
+        hf.append(2*hp[i]*hr[i]/(hp[i] + hr[i]))
+        mf.append(2*mp[i]*mr[i]/(mp[i] + mr[i]))
+        lf.append(2*lp[i]*lr[i]/(lp[i] + lr[i]))
+    return hf, mf, lf
 
 def extractExecution(metas):
     high = []
@@ -129,6 +163,34 @@ def extractPeriod(metas):
         low.append(l)
 
     return high, med, low
+
+def getOverallAcc(cnf):
+    total = 0
+    correct = 0
+    for i in range(len(cnf)):
+        for j in range(len(cnf[0])):
+            total += cnf[i][j]
+            if i == j:
+                correct += cnf[i][j]
+    return correct/total
+
+def extractOverallAcc(cnfs):
+    output = []
+    for cnf in cnfs:
+        output.append(getOverallAcc(cnf))
+    return output
+
+def extractMatrixId(cnfFileName):
+    parts = cnfFileName.split('/')[-1].split('.')
+    return int(parts[0])
+            
+def extractMatrixConf(cnfFileName):
+    parts = cnfFileName.split('/')[-1].split('.')
+    if parts[1] == 'nnp':
+        return 99
+    elif parts[1] == 'np':
+        return 0
+    return -1
 
 # returns filtered metas with utility heavily distributed to H
 def pickHeavyH(metas):
@@ -200,11 +262,11 @@ def metaParser(filename):
     return me
 
 
-def plotAccVsTaskUtil(cnfs, metas):
+def plotRecallVsTaskUtil(cnfs, metas):
     if len(cnfs) != len(metas):
         return None
 
-    ha, ma, ia = extractAccuracy(cnfs, metas)
+    ha, ma, ia = extractRecall(cnfs, metas)
     hu, mu, iu = extractUtility(metas)
 
     plt.scatter(hu, ha, c='r')
@@ -216,16 +278,89 @@ def plotAccVsTaskUtil(cnfs, metas):
 
 
 if __name__ == "__main__":
+
+    dotSize = 4
     print("hello crule world")
-    metaFiles = glob.glob("./lowMetas/*_meta.txt")
-    lowMetas = []
+    metaFiles = glob.glob("./medMetas/*_meta.txt")
+    medMetas = []
     for mef in metaFiles:
         me = metaParser(mef)
-        lowMetas.append(me)
+        medMetas.append(me)
 
-    h, m, l = extractUtilization(lowMetas)
+    resultFiles = glob.glob("./medResults/*.npy")
+    group = {0:{}, 99:{}}
+    for mf in resultFiles:
+        conf = extractMatrixConf(mf)
+        mId = extractMatrixId(mf)
+        group[conf][mId]=np.load(mf)
 
+    conf0List = []
+    conf99List = []
+    for me in medMetas:
+        mId = getRep(me["name"])
+        conf0List.append(group[0][mId])
+        conf99List.append(group[99][mId])
+
+    h, m, l = extractUtilization(medMetas)
+    hp, mp, lp = extractPrecision(conf0List, medMetas)
+    hr, mr, lr = extractRecall(conf0List, medMetas)
+    hf, mf, lf = extractF1(conf0List, medMetas)
+
+    f, ((ax00, ax10, ax20), (ax01, ax11, ax21), (ax02, ax12, ax22)) = plt.subplots(3, 3, sharex='col', sharey='row')
+    f.suptitle("Equally Heavy Medium Utility Group")
+    ax00.set_title('Per Task Precision vs Utility')
+    ax00.scatter(h, hp, c='r', s=dotSize)
+    ax00.scatter(m, mp, c='g', s=dotSize)
+    ax00.scatter(l, lp, c='b', s=dotSize)
+
+    ax01.set_title('Per Task Recall vs Utility')
+    ax01.scatter(h, hr, c='r', s=dotSize)
+    ax01.scatter(m, mr, c='g', s=dotSize)
+    ax01.scatter(l, lr, c='b', s=dotSize)
+
+    ax02.set_title('Per Task F1 vs Utility')
+    ax02.scatter(h, hf, c='r', s=dotSize)
+    ax02.scatter(m, mf, c='g', s=dotSize)
+    ax02.scatter(l, lf, c='b', s=dotSize)
+
+
+    h, m, l = extractPeriod(medMetas)
+    ax10.set_title('Per Task Precision vs Period')
+    ax10.scatter(h, hp, c='r', s=dotSize)
+    ax10.scatter(m, mp, c='g', s=dotSize)
+    ax10.scatter(l, lp, c='b', s=dotSize)
+
+    ax11.set_title('Per Task Recall vs Period')
+    ax11.scatter(h, hr, c='r', s=dotSize)
+    ax11.scatter(m, mr, c='g', s=dotSize)
+    ax11.scatter(l, lr, c='b', s=dotSize)
+
+    ax12.set_title('Per Task F1 vs Period')
+    ax12.scatter(h, hf, c='r', s=dotSize)
+    ax12.scatter(m, mf, c='g', s=dotSize)
+    ax12.scatter(l, lf, c='b', s=dotSize)
+
+
+    h, m, l = extractExecution(medMetas)
+    ax20.set_title('Per Task Precision vs Execution')
+    ax20.scatter(h, hp, c='r', s=dotSize)
+    ax20.scatter(m, mp, c='g', s=dotSize)
+    ax20.scatter(l, lp, c='b', s=dotSize)
+
+    ax21.set_title('Per Task Recall vs Execution')
+    ax21.scatter(h, hr, c='r', s=dotSize)
+    ax21.scatter(m, mr, c='g', s=dotSize)
+    ax21.scatter(l, lr, c='b', s=dotSize)
+
+    ax22.set_title('Per Task F1 vs Execution')
+    ax22.scatter(h, hf, c='r', s=dotSize)
+    ax22.scatter(m, mf, c='g', s=dotSize)
+    ax22.scatter(l, lf, c='b', s=dotSize)
+
+    plt.show()
+    '''
     heavyL = pickHeavyL(lowMetas)
+    print(heavyL)
     heavyM = pickHeavyM(lowMetas)
     heavyH = pickHeavyH(lowMetas)
 
@@ -243,7 +378,9 @@ if __name__ == "__main__":
     for me in heavyL:
         whiteList.append(me["name"])
 
+    print(len(whiteList))
 
+    '''
 
     '''
     blackList = set(metaFiles) - set(whiteList)
