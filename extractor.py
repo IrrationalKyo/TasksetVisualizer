@@ -281,88 +281,88 @@ if __name__ == "__main__":
 
     dotSize = 4
     print("hello crule world")
-    metaFiles = glob.glob("./medMetas/*_meta.txt")
+    metaFiles = glob.glob("./metas/*_meta.txt")
     medMetas = []
     for mef in metaFiles:
         me = metaParser(mef)
         medMetas.append(me)
 
-    resultFiles = glob.glob("./medResults/*.npy")
-    group = {0:{}, 99:{}}
-    for mf in resultFiles:
-        conf = extractMatrixConf(mf)
-        mId = extractMatrixId(mf)
-        group[conf][mId]=np.load(mf)
+    # resultFiles = glob.glob("./medResults/*.npy")
+    # group = {0:{}, 99:{}}
+    # for mf in resultFiles:
+    #     conf = extractMatrixConf(mf)
+    #     mId = extractMatrixId(mf)
+    #     group[conf][mId]=np.load(mf)
+    #
+    # conf0List = []
+    # conf99List = []
+    # for me in medMetas:
+    #     mId = getRep(me["name"])
+    #     conf0List.append(group[0][mId])
+    #     conf99List.append(group[99][mId])
+    #
+    # h, m, l = extractUtilization(medMetas)
+    # hp, mp, lp = extractPrecision(conf0List, medMetas)
+    # hr, mr, lr = extractRecall(conf0List, medMetas)
+    # hf, mf, lf = extractF1(conf0List, medMetas)
+    #
+    # f, ((ax00, ax10, ax20), (ax01, ax11, ax21), (ax02, ax12, ax22)) = plt.subplots(3, 3, sharex='col', sharey='row')
+    # f.suptitle("Equally Heavy Medium Utility Group")
+    # ax00.set_title('Per Task Precision vs Utility')
+    # ax00.scatter(h, hp, c='r', s=dotSize)
+    # ax00.scatter(m, mp, c='g', s=dotSize)
+    # ax00.scatter(l, lp, c='b', s=dotSize)
+    #
+    # ax01.set_title('Per Task Recall vs Utility')
+    # ax01.scatter(h, hr, c='r', s=dotSize)
+    # ax01.scatter(m, mr, c='g', s=dotSize)
+    # ax01.scatter(l, lr, c='b', s=dotSize)
+    #
+    # ax02.set_title('Per Task F1 vs Utility')
+    # ax02.scatter(h, hf, c='r', s=dotSize)
+    # ax02.scatter(m, mf, c='g', s=dotSize)
+    # ax02.scatter(l, lf, c='b', s=dotSize)
+    #
+    #
+    # h, m, l = extractPeriod(medMetas)
+    # ax10.set_title('Per Task Precision vs Period')
+    # ax10.scatter(h, hp, c='r', s=dotSize)
+    # ax10.scatter(m, mp, c='g', s=dotSize)
+    # ax10.scatter(l, lp, c='b', s=dotSize)
+    #
+    # ax11.set_title('Per Task Recall vs Period')
+    # ax11.scatter(h, hr, c='r', s=dotSize)
+    # ax11.scatter(m, mr, c='g', s=dotSize)
+    # ax11.scatter(l, lr, c='b', s=dotSize)
+    #
+    # ax12.set_title('Per Task F1 vs Period')
+    # ax12.scatter(h, hf, c='r', s=dotSize)
+    # ax12.scatter(m, mf, c='g', s=dotSize)
+    # ax12.scatter(l, lf, c='b', s=dotSize)
+    #
+    #
+    # h, m, l = extractExecution(medMetas)
+    # ax20.set_title('Per Task Precision vs Execution')
+    # ax20.scatter(h, hp, c='r', s=dotSize)
+    # ax20.scatter(m, mp, c='g', s=dotSize)
+    # ax20.scatter(l, lp, c='b', s=dotSize)
+    #
+    # ax21.set_title('Per Task Recall vs Execution')
+    # ax21.scatter(h, hr, c='r', s=dotSize)
+    # ax21.scatter(m, mr, c='g', s=dotSize)
+    # ax21.scatter(l, lr, c='b', s=dotSize)
+    #
+    # ax22.set_title('Per Task F1 vs Execution')
+    # ax22.scatter(h, hf, c='r', s=dotSize)
+    # ax22.scatter(m, mf, c='g', s=dotSize)
+    # ax22.scatter(l, lf, c='b', s=dotSize)
+    #
+    # plt.show()
 
-    conf0List = []
-    conf99List = []
-    for me in medMetas:
-        mId = getRep(me["name"])
-        conf0List.append(group[0][mId])
-        conf99List.append(group[99][mId])
-
-    h, m, l = extractUtilization(medMetas)
-    hp, mp, lp = extractPrecision(conf0List, medMetas)
-    hr, mr, lr = extractRecall(conf0List, medMetas)
-    hf, mf, lf = extractF1(conf0List, medMetas)
-
-    f, ((ax00, ax10, ax20), (ax01, ax11, ax21), (ax02, ax12, ax22)) = plt.subplots(3, 3, sharex='col', sharey='row')
-    f.suptitle("Equally Heavy Medium Utility Group")
-    ax00.set_title('Per Task Precision vs Utility')
-    ax00.scatter(h, hp, c='r', s=dotSize)
-    ax00.scatter(m, mp, c='g', s=dotSize)
-    ax00.scatter(l, lp, c='b', s=dotSize)
-
-    ax01.set_title('Per Task Recall vs Utility')
-    ax01.scatter(h, hr, c='r', s=dotSize)
-    ax01.scatter(m, mr, c='g', s=dotSize)
-    ax01.scatter(l, lr, c='b', s=dotSize)
-
-    ax02.set_title('Per Task F1 vs Utility')
-    ax02.scatter(h, hf, c='r', s=dotSize)
-    ax02.scatter(m, mf, c='g', s=dotSize)
-    ax02.scatter(l, lf, c='b', s=dotSize)
-
-
-    h, m, l = extractPeriod(medMetas)
-    ax10.set_title('Per Task Precision vs Period')
-    ax10.scatter(h, hp, c='r', s=dotSize)
-    ax10.scatter(m, mp, c='g', s=dotSize)
-    ax10.scatter(l, lp, c='b', s=dotSize)
-
-    ax11.set_title('Per Task Recall vs Period')
-    ax11.scatter(h, hr, c='r', s=dotSize)
-    ax11.scatter(m, mr, c='g', s=dotSize)
-    ax11.scatter(l, lr, c='b', s=dotSize)
-
-    ax12.set_title('Per Task F1 vs Period')
-    ax12.scatter(h, hf, c='r', s=dotSize)
-    ax12.scatter(m, mf, c='g', s=dotSize)
-    ax12.scatter(l, lf, c='b', s=dotSize)
-
-
-    h, m, l = extractExecution(medMetas)
-    ax20.set_title('Per Task Precision vs Execution')
-    ax20.scatter(h, hp, c='r', s=dotSize)
-    ax20.scatter(m, mp, c='g', s=dotSize)
-    ax20.scatter(l, lp, c='b', s=dotSize)
-
-    ax21.set_title('Per Task Recall vs Execution')
-    ax21.scatter(h, hr, c='r', s=dotSize)
-    ax21.scatter(m, mr, c='g', s=dotSize)
-    ax21.scatter(l, lr, c='b', s=dotSize)
-
-    ax22.set_title('Per Task F1 vs Execution')
-    ax22.scatter(h, hf, c='r', s=dotSize)
-    ax22.scatter(m, mf, c='g', s=dotSize)
-    ax22.scatter(l, lf, c='b', s=dotSize)
-
-    plt.show()
-    '''
-    heavyL = pickHeavyL(lowMetas)
+    heavyL = pickHeavyL(medMetas)
     print(heavyL)
-    heavyM = pickHeavyM(lowMetas)
-    heavyH = pickHeavyH(lowMetas)
+    heavyM = pickHeavyM(medMetas)
+    heavyH = pickHeavyH(medMetas)
 
     print("high heavy: "+ str(len(heavyH)))
     print("med heavy: "+ str(len(heavyM)))
@@ -380,11 +380,8 @@ if __name__ == "__main__":
 
     print(len(whiteList))
 
-    '''
 
-    '''
     blackList = set(metaFiles) - set(whiteList)
     for b in blackList:
         os.remove(b)
-    '''
 

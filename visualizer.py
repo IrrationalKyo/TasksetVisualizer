@@ -73,8 +73,8 @@ if __name__ == "__main__":
     # second execution vs acc
     # third period vs acc
 
-    utilNames = ["./lowMetas"]
-    resultNames = ["./lowResults"]
+    utilNames = ["./medMetas_heavy"]
+    resultNames = ["./medResults_heavy"]
     metas = []
     matrices = []
 
@@ -119,5 +119,6 @@ if __name__ == "__main__":
     print("heavyM Average Acc: " + str(sum(heavyMAccs)/len(heavyMAccs)) )
     print("heavyL Average Acc: " + str(sum(heavyLAccs)/len(heavyLAccs)) )
 
-    plot(heavyHMat0, heavyH, "Heavy High Priority Task Low Utilization")
-    plot(heavyMMat0, heavyM, "Heavy Medium Priority Task Low Utilization")
+    plot(heavyHMat0, heavyH, "Heavy High Priority Task Med Utilization")
+    plot(heavyMMat0, heavyM, "Heavy Medium Priority Task Med Utilization")
+    plot(heavyLMat0, heavyL, "Heavy Medium Priority Task Med Utilization")

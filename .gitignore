@@ -3,3 +3,6 @@ venv/
 .idea/
 highMetas/
 lowMetas/
+medMetas_heavy/
+medResults_heavy/
+__pycache__/
